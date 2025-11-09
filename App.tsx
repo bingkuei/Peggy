@@ -4,26 +4,29 @@ import SearchBar from './components/SearchBar';
 import MemberCard from './components/MemberCard';
 import MemberDetailModal from './components/MemberDetailModal';
 import StatsSummary from './components/StatsSummary';
+import TrafficLightChart from './components/TrafficLightChart'; // 導入圖表元件
 import { memberData } from './data/memberData';
 import { Member } from './types';
 
 const App: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState<string>(Object.keys(memberData)[0]);
+  const [selectedMonth] = useState<string>(Object.keys(memberData)[0]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
-  const availableMonths = Object.keys(memberData);
-
   const filteredMembers = useMemo(() => {
+    // 讓圖表和統計數據永遠反映當月全體會員，不受搜尋影響
     const dataForMonth: Member[] = memberData[selectedMonth] || [];
     if (!searchQuery.trim()) {
       return dataForMonth;
     }
     return dataForMonth.filter(member =>
-      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.id.toString().includes(searchQuery)
+      member.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [selectedMonth, searchQuery]);
+
+  const allMembersForMonth = useMemo(() => {
+    return memberData[selectedMonth] || [];
+  }, [selectedMonth]);
 
   const stats = useMemo(() => {
     const counts = {
@@ -32,15 +35,15 @@ const App: React.FC = () => {
       red: 0,
       black: 0,
     };
-    filteredMembers.forEach(member => {
+    allMembersForMonth.forEach(member => {
       const score = member.scores.trafficLightScore;
       if (score >= 70) counts.green++;
       else if (score >= 60) counts.yellow++;
-      else if (score >= 40) counts.red++;
+      else if (score >= 5 && score <= 55) counts.red++;
       else counts.black++;
     });
     return counts;
-  }, [filteredMembers]);
+  }, [allMembersForMonth]);
 
   const handleMemberSelect = (member: Member) => {
     setSelectedMember(member);
@@ -55,12 +58,12 @@ const App: React.FC = () => {
       <div className="container mx-auto p-4 md:p-8">
         <Header />
         <StatsSummary stats={stats} />
+        <TrafficLightChart stats={stats} /> 
         <SearchBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
-          availableMonths={availableMonths}
+          currentMonth={selectedMonth}
+          totalMembers={allMembersForMonth.length}
         />
 
         <main className="mt-8">
@@ -82,7 +85,7 @@ const App: React.FC = () => {
         </main>
 
         <footer className="text-center text-sm text-gray-500 mt-12 py-4 border-t border-gray-800">
-          <p>製作人資訊：副主席林沛綺</p>
+          <p>© 2025 欣冠達國際實業有限公司 林沛綺｜All Rights Reserved</p>
         </footer>
       </div>
 

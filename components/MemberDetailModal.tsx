@@ -10,9 +10,33 @@ interface MemberDetailModalProps {
 const getTrafficLightColor = (score: number) => {
   if (score >= 70) return { bg: 'bg-green-500', text: 'text-green-500', border: 'border-green-500' };
   if (score >= 60) return { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500' };
-  if (score >= 40) return { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500' };
+  if (score >= 5 && score <= 55) return { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500' };
   return { bg: 'bg-gray-600', text: 'text-gray-400', border: 'border-gray-600' };
 };
+
+const getSummaryMessage = (score: number): string => {
+  if (score === 100) {
+    return '你目前的分數是100分，太棒了，你是滿分的會員，感謝你的努力與付出！';
+  }
+  if (score >= 80) {
+    return `你目前的分數是 ${score} 分，你是很棒的綠燈會員！付出一定會有收穫！`;
+  }
+  if (score >= 70) {
+    return `你目前的分數是 ${score} 分，恭喜本週獲得綠燈！成功達標，持續精進！`;
+  }
+  if (score >= 60) {
+    return `你目前的分數是 ${score} 分，目前是黃燈狀態，差一點就綠燈！`;
+  }
+  if (score >= 5) {
+    return `你目前的分數是 ${score} 分，目前是紅燈狀態，如果有任何需要協助的地方，請一定讓會員來協助你，一起邁向綠燈會員`;
+  }
+  if (score === 0) {
+    return '你目前的分數是0分，天黑黑～要下雨～黑燈了！你累了嗎，我們都與你同在，有任何問題全鑫夥伴都會為你傾聽的！';
+  }
+  // For scores between 1 and 4
+  return `你目前的分數是${score}分，天黑黑～要下雨～黑燈了！你累了嗎，我們都與你同在，有任何問題全鑫夥伴都會為你傾聽的！`;
+};
+
 
 const formatValue = (value: number) => {
   if (value < 0) {
@@ -110,6 +134,16 @@ const MemberDetailModal: React.FC<MemberDetailModalProps> = ({ member, onClose }
             </dl>
           </div>
         </div>
+
+        {/* Summary Section */}
+        <div className="px-6 pb-6">
+            <blockquote className={`p-4 rounded-lg border-l-4 ${colorInfo.border} bg-gray-900/50`}>
+                <p className="text-gray-200 italic">
+                  "{getSummaryMessage(scores.trafficLightScore)}"
+                </p>
+            </blockquote>
+        </div>
+
       </div>
     </div>
   );
